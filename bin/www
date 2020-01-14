@@ -1,0 +1,36 @@
+#!/usr/bin/env node
+
+const express = require('express');
+const YAML = require('yamljs');
+const { connector } = require('swagger-routes-express');
+const api = require('../api/index');
+
+const makeApp = () => {
+  const apiDefinition = YAML.load("/Users/c249473/Development/.personal/swagger-express/api.yml"); // load the api as json
+
+  const myMiddleware = (req, res, next) => {
+    res.user = "Steve";
+    next();
+  };
+
+  const connect = connector(api, apiDefinition,   {
+    middleware: {
+      myMiddleware: myMiddleware
+    }
+  }); // make the connector
+  const app = express(); // make the app
+
+  // do any other app stuff, such as wire in passport, use cors etc
+
+  connect(app); // attach the routes
+
+  // add any error handlers last
+
+  return app;
+};
+
+const app = makeApp();
+
+app.listen(3000, () => {
+  console.log('Listening')
+})
